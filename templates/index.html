@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Big Number Addition</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <style>
+            .calculation-steps {
+                font-family: monospace;
+                white-space: pre-wrap;
+                background-color: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin-top: 20px;
+            }
+            .final-result {
+                font-size: 24px;
+                font-weight: bold;
+                color: #28a745;
+                margin-bottom: 20px;
+            }
+            .step-container {
+                margin-bottom: 15px;
+                padding: 15px;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background-color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <h1 class="text-center mb-4">Cộng Số Lớn</h1>
+                    <form id="additionForm" class="mt-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="number1" class="form-label">Số thứ nhất</label>
+                                    <input type="text" class="form-control" id="number1" name="number1" placeholder="Nhập số thứ nhất" required />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="number2" class="form-label">Số thứ hai</label>
+                                    <input type="text" class="form-control" id="number2" name="number2" placeholder="Nhập số thứ hai" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Tính Tổng</button>
+                        </div>
+                    </form>
+
+                    <div id="progressContainer" class="mt-3" style="display: none">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <p class="text-center mt-2">Đang tính toán...</p>
+                    </div>
+
+                    <div id="result" class="mt-4" style="display: none">
+                        <div class="final-result text-center"></div>
+                        <div class="calculation-steps"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById("additionForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const progress = document.getElementById("progressContainer");
+                const resultDiv = document.getElementById("result");
+                progress.style.display = "block";
+                resultDiv.style.display = "none";
+
+                const formData = new FormData(this);
+
+                fetch("/add", {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        progress.style.display = "none";
+                        resultDiv.style.display = "block";
+
+                        console.log("Received data:", data);
+                        document.querySelector(".final-result").innerHTML = `Kết quả: ${data.result}`;
+
+                        const stepsContainer = document.querySelector(".calculation-steps");
+                        console.log("Raw steps:", data.steps);
+
+                        const steps = data.steps
+                            .split("----------------------------------------")
+                            .map((step) => step.trim())
+                            .filter((step) => step);
+
+                        console.log("Processed steps:", steps);
+
+                        stepsContainer.innerHTML = steps.map((step) => `<div class="step-container">${step.replace(/\n/g, "<br>")}</div>`).join("");
+                    })
+                    .catch((error) => {
+                        progress.style.display = "none";
+                        resultDiv.style.display = "block";
+                        document.querySelector(".final-result").innerHTML = "Có lỗi xảy ra: " + error.message;
+                        document.querySelector(".calculation-steps").innerHTML = "";
+                    });
+            });
+        </script>
+    </body>
+</html>

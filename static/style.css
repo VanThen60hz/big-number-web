@@ -1,0 +1,10 @@
+body {
+    background-color: #f8f9fa;
+}
+.container {
+    max-width: 600px;
+}
+pre {
+    white-space: pre-wrap;
+    font-size: 0.9em;
+}
